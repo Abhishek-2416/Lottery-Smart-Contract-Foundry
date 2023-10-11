@@ -6,7 +6,7 @@ import {VRFCoordinatorV2Mock} from "@chainlink/contracts/src/v0.8/mocks/VRFCoord
 
 contract HelperConfig is Script{
     struct NetworkConfig{
-        //This will bascially contain all the things we have in our constructor
+        //This will bascially contain all the things we have in our constructor of our main contract that is Raffle here
         uint256 _entranceFee;
         uint256 _interval;
         address vrfCoordinator;
