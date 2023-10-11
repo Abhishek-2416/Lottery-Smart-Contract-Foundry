@@ -47,6 +47,7 @@ contract Raffle is VRFConsumerBaseV2{
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         s_raffleState = RaffleState.OPEN;
+        i_callbackGasLimit = callbackGasLimit;
     }
 
     //The EnterRaffle function is to make people enter into the raffle and also this function is external as we wont have anything other function to call it and external is more gas efficient
