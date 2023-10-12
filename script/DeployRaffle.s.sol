@@ -6,7 +6,7 @@ import {Raffle} from "../src/Raffle.sol";
 import {HelperConfig} from "../script/HelperConfig.s.sol";
 
 contract DeployRaffle is Script{
-    function run() external returns(Raffle){
+    function run() external returns(Raffle,HelperConfig){
         HelperConfig helperConfig = new HelperConfig();
         //Here we are deconstructing the Network Config into thesse parameters
         (
@@ -18,6 +18,11 @@ contract DeployRaffle is Script{
         uint32 callbackGasLimit
         ) = helperConfig.activeNetworkConfig();
 
+        if(subscriptionId == 0){
+            //In this case we need to create an subscription id
+            
+        }
+
         vm.startBroadcast();
         Raffle raffle = new Raffle(
             _entranceFee,
@@ -28,6 +33,6 @@ contract DeployRaffle is Script{
             callbackGasLimit
         );
         vm.stopBroadcast();
-        return raffle;
+        return (raffle,helperConfig);
     }
 }
