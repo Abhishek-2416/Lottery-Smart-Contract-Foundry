@@ -83,4 +83,75 @@ contract RaffleTest is Test{
         vm.prank(PLAYER);
         raffle.enterRaffle{value: _entranceFee}();
     }
+
+    ////////////////////
+    /// enterRaffle ///
+    //////////////////
+
+    function testCheckUpKeepReturnsFalseIfIthasNoBalance() public{
+        //Arrange
+        vm.warp(block.timestamp + _interval + 1);
+
+        //Act
+        (bool upKeepNeeded,) = raffle.checkUpkeep("");
+
+        //Assert
+        assertEq(upKeepNeeded,false);
+    }
+
+    function testCheckUpkeepReturnsFalseIfRaffleNotOpen() public {
+        //Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: _entranceFee}();
+        vm.warp(block.timestamp + _interval + 1);
+        raffle.performUpkeep("");
+
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+        assert(!upKeepNeeded);
+    }
+
+    function testCheckUpkeepReturnsFalseIfEnoughTimeHasntPassed() public{
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: _entranceFee}();
+        (bool upKeepNeeded,) = raffle.checkUpkeep("");
+        assertEq(upKeepNeeded,false);
+    }
+
+    function testCheckUpkeepReturnsTrueWhenParametersAreGood() public{
+        //Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: _entranceFee}();
+        vm.warp(block.timestamp + _interval + 1);
+
+        (bool upKeepNeeded,) = raffle.checkUpkeep("");
+        assertEq(upKeepNeeded,true);
+    }
+
+    ///////////////////////
+    /// performUpKeep   //
+    /////////////////////
+
+    function testPerformUpKeepCanOnlyRunIfCheckUpKeepisTrue() public {
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: _entranceFee}();
+        vm.warp(block.timestamp + _interval + 1);
+        raffle.performUpkeep("");
+    }
+
+    function testPerformUpkeepRevertsIfCheckUpKeepIsFalse() public{
+        uint256 currentBalance = 0;
+        uint256 numPlayers = 0;
+        uint256 raffleState = 0;
+        vm.expectRevert(
+            abi.encodeWithSelector(Raffle.Raffle__UpKeepNotNeeded.selector,
+            currentBalance,
+            numPlayers,
+            raffleState)
+        );
+        raffle.performUpkeep("");
+    }
+
+
+
+
 }
