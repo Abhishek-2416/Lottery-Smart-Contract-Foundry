@@ -10,10 +10,10 @@ contract RaffleTest is Test{
     /** Events */
     event EnteredRaffle(address indexed player);
 
-
     Raffle raffle;
     HelperConfig helperConfig;
 
+    /**State Variables */
     uint256 _entranceFee;
     uint256 _interval;
     address vrfCoordinator;
@@ -39,6 +39,7 @@ contract RaffleTest is Test{
     }
 
     function testRaffleInitializesInOpenState() public view{
+        //We are just checking if the current value of RaffleState is OPEN
         assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
     }
 
@@ -55,16 +56,13 @@ contract RaffleTest is Test{
         raffle.enterRaffle();
     }
 
-    function testRaffleRecordsPlayersWhenTheyEnter() public{
-        //Arrange
+    function testRaffleRecordsPlayerWhenTheyEnter() public{
         vm.prank(PLAYER);
-        //Act
-        raffle.enterRaffle{value:_entranceFee}();
-        //Assert
+        raffle.enterRaffle{value: _entranceFee}();
         assertEq(raffle.getPlayer(0),PLAYER);
     }
 
-    function testEmitsEventOnEntrance() public{
+    function testEmitsEventsOnEntrance() public {
         vm.prank(PLAYER);
         vm.expectEmit(true,false,false,false);
         emit EnteredRaffle(PLAYER);
@@ -74,14 +72,13 @@ contract RaffleTest is Test{
     function testCantEnterWhenRaffleIsCalculating() public{
         vm.prank(PLAYER);
         raffle.enterRaffle{value:_entranceFee}();
-        vm.warp(block.timestamp + _interval);
-        vm.roll(block.number + 1);
+        //Now to test this condition we need to call the performUpkeep function and for that we need to check all conditions of checkUpKeep
+        //This is test to go ahead in time
+        vm.warp(block.timestamp + _interval + 1);
         raffle.performUpkeep("");
 
         vm.expectRevert(Raffle.Raffle__RaffleNotOpen.selector);
         vm.prank(PLAYER);
-        raffle.enterRaffle{value:_entranceFee}();
+        raffle.enterRaffle{value: _entranceFee}();
     }
-
-
 }
