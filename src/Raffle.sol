@@ -39,6 +39,7 @@ contract Raffle is VRFConsumerBaseV2{
     /**Events */
     event EnteredRaffle(address indexed player);
     event WinnerPicked(address indexed winner);
+    event RequestedRaffleWinner(uint256 indexed requestId);
 
     constructor(uint256 _entranceFee,uint256 _interval,address vrfCoordinator,bytes32 gasLane,uint64 subscriptionId,uint32 callbackGasLimit)VRFConsumerBaseV2(vrfCoordinator){
         i_entranceFee = _entranceFee;
@@ -97,13 +98,15 @@ contract Raffle is VRFConsumerBaseV2{
         s_raffleState = RaffleState.CALCULATING;
 
         //Now pick a random winner, pretty much with this we have a way to actually to make a request with the chainlink contract
-        i_vrfCoordinator.requestRandomWords(
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
             NUM_WORDS
         );
+
+        emit RequestedRaffleWinner(requestId);
     }
 
     //Now this is function which the chainlink node is going to call in order for us to get our random number back
@@ -145,5 +148,17 @@ contract Raffle is VRFConsumerBaseV2{
 
     function getPlayer(uint256 indexOfPlayer) external view returns(address){
         return s_players[indexOfPlayer];
+    }
+
+    function getRecentWinner() external view returns(address){
+        return s_recentWinner;
+    }
+
+    function getLengthOfPlayers() external view returns(uint){
+        return s_players.length;
+    }
+
+    function getLastTimestamp() external view returns(uint256){
+        return s_lastTimeStamp;
     }
 }
